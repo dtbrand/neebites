@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="auto">
+  <defs>
+    <radialGradient id="rubBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FCF6F8"/>
+      <stop offset="70%" stop-color="#F9E8EE"/>
+      <stop offset="100%" stop-color="#F0D3DD"/>
+    </radialGradient>
+    <linearGradient id="chocRubyShell" x1="20%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#E56B85"/>
+      <stop offset="45%" stop-color="#C43B5C"/>
+      <stop offset="85%" stop-color="#991F3C"/>
+      <stop offset="100%" stop-color="#6E1128"/>
+    </linearGradient>
+    <linearGradient id="almondNut" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EED6B3"/>
+      <stop offset="50%" stop-color="#D9A86C"/>
+      <stop offset="100%" stop-color="#A0632D"/>
+    </linearGradient>
+    <linearGradient id="goldRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D77F"/>
+      <stop offset="50%" stop-color="#C59B27"/>
+      <stop offset="100%" stop-color="#936D10"/>
+    </linearGradient>
+    <filter id="rubShadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#6E1128" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+  <rect width="500" height="500" rx="24" fill="url(#rubBg)"/>
+
+  <!-- Pedestal shadow -->
+  <ellipse cx="250" cy="395" rx="145" ry="24" fill="#2D1609" opacity="0.16"/>
+  <ellipse cx="250" cy="392" rx="110" ry="16" fill="#2D1609" opacity="0.22"/>
+
+  <!-- Main Enrobed Chocolate Coated Almond -->
+  <g filter="url(#rubShadow)">
+    <path d="M250,110 C320,135 365,220 345,310 C330,370 275,385 240,385 C195,385 145,360 140,290 C135,210 190,120 250,110 Z" fill="url(#chocRubyShell)"/>
+
+    <!-- Specular Highlight -->
+    <ellipse cx="220" cy="180" rx="35" ry="18" fill="#FFFFFF" opacity="0.3" transform="rotate(-35 220 180)"/>
+
+    <!-- Tart Freeze Dried Raspberry Dust Particles -->
+    <circle cx="210" cy="160" r="2.2" fill="#FFFFFF" opacity="0.7"/>
+    <circle cx="270" cy="170" r="2.5" fill="#FFE4EC" opacity="0.8"/>
+    <circle cx="310" cy="260" r="2.2" fill="#FFE4EC" opacity="0.7"/>
+    <circle cx="170" cy="230" r="2.4" fill="#FFE4EC" opacity="0.8"/>
+    <circle cx="220" cy="340" r="2.2" fill="#FFE4EC" opacity="0.7"/>
+    <circle cx="300" cy="320" r="2.1" fill="#FFFFFF" opacity="0.7"/>
+
+    <!-- Nut Reveal Cross Section Inlay -->
+    <g transform="translate(195, 235)">
+      <ellipse cx="40" cy="40" rx="28" ry="36" fill="url(#almondNut)" transform="rotate(-15 40 40)"/>
+      <ellipse cx="40" cy="40" rx="23" ry="30" fill="#FDF3E3" opacity="0.9" transform="rotate(-15 40 40)"/>
+      <path d="M35,16 Q40,40 37,64" stroke="#D9A86C" stroke-width="2" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Luxury Badge Top Left -->
+  <g transform="translate(35, 40)">
+    <rect width="145" height="34" rx="17" fill="url(#goldRibbon)"/>
+    <text x="72" y="22" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="12" font-weight="700" fill="#241408">NATURAL RUBY</text>
+  </g>
+
+  <!-- Flavour Badge Bottom Right -->
+  <g transform="translate(280, 425)">
+    <rect width="185" height="38" rx="19" fill="#991F3C"/>
+    <text x="92" y="24" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="13" font-weight="700" fill="#FAF6F0">🍓 Ruby Almond</text>
+  </g>
+</svg>

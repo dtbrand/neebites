@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="auto">
+  <defs>
+    <radialGradient id="kiwiBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FAF8F2"/>
+      <stop offset="70%" stop-color="#EFF5E6"/>
+      <stop offset="100%" stop-color="#D9E8C7"/>
+    </radialGradient>
+    <linearGradient id="chocKiwiShell" x1="20%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#552E1B"/>
+      <stop offset="50%" stop-color="#3C1F12"/>
+      <stop offset="100%" stop-color="#231108"/>
+    </linearGradient>
+    <linearGradient id="kiwiGlaze" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A4E034"/>
+      <stop offset="50%" stop-color="#73BA1E"/>
+      <stop offset="100%" stop-color="#4E8C0E"/>
+    </linearGradient>
+    <linearGradient id="goldRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D77F"/>
+      <stop offset="50%" stop-color="#C59B27"/>
+      <stop offset="100%" stop-color="#936D10"/>
+    </linearGradient>
+    <filter id="kiwiShadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#22360E" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="500" height="500" rx="24" fill="url(#kiwiBg)"/>
+
+  <!-- Pedestal shadow -->
+  <ellipse cx="250" cy="395" rx="145" ry="24" fill="#2D1609" opacity="0.18"/>
+  <ellipse cx="250" cy="392" rx="110" ry="16" fill="#2D1609" opacity="0.25"/>
+
+  <!-- Kiwi Leaf Accent -->
+  <path d="M110,380 C85,350 80,280 120,245 C145,285 135,350 110,380 Z" fill="#6A9A28" opacity="0.35"/>
+  <path d="M390,380 C415,350 420,280 380,245 C355,285 365,350 390,380 Z" fill="#6A9A28" opacity="0.35"/>
+
+  <!-- Main Enrobed Chocolate Coated Almond -->
+  <g filter="url(#kiwiShadow)">
+    <!-- Main Almond Body -->
+    <path d="M250,110 C320,135 365,220 345,310 C330,370 275,385 240,385 C195,385 145,360 140,290 C135,210 190,120 250,110 Z" fill="url(#chocKiwiShell)"/>
+
+    <!-- Specular Highlight -->
+    <ellipse cx="220" cy="180" rx="35" ry="18" fill="#FFFFFF" opacity="0.18" transform="rotate(-35 220 180)"/>
+
+    <!-- Signature Tangy Kiwi Fruit Glaze Drizzle Ribbons -->
+    <path d="M165,220 C210,190 270,225 325,195 C335,215 320,230 300,235 C250,245 205,215 165,220 Z" fill="url(#kiwiGlaze)"/>
+    <path d="M150,270 C200,245 260,280 335,255 C345,275 325,290 305,295 C255,305 195,270 150,270 Z" fill="url(#kiwiGlaze)"/>
+    <path d="M160,320 C210,295 270,335 330,315 C338,332 322,345 300,350 C250,358 200,322 160,320 Z" fill="url(#kiwiGlaze)"/>
+
+    <!-- Fresh Kiwi Fruit Wheel Ornament -->
+    <g transform="translate(195, 235)">
+      <circle cx="45" cy="45" r="38" fill="#7CBD1F" stroke="#487514" stroke-width="2"/>
+      <circle cx="45" cy="45" r="14" fill="#EAF7D0"/>
+      <!-- Radiating Kiwi Seeds -->
+      <line x1="45" y1="20" x2="45" y2="28" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="2,2"/>
+      <line x1="45" y1="62" x2="45" y2="70" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="2,2"/>
+      <line x1="20" y1="45" x2="28" y2="45" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="2,2"/>
+      <line x1="62" y1="45" x2="70" y2="45" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="2,2"/>
+      <!-- Tiny Black Seeds -->
+      <circle cx="34" cy="32" r="2.2" fill="#1C140D"/>
+      <circle cx="56" cy="32" r="2.2" fill="#1C140D"/>
+      <circle cx="34" cy="58" r="2.2" fill="#1C140D"/>
+      <circle cx="56" cy="58" r="2.2" fill="#1C140D"/>
+      <circle cx="28" cy="45" r="2.2" fill="#1C140D"/>
+      <circle cx="62" cy="45" r="2.2" fill="#1C140D"/>
+      <circle cx="45" cy="27" r="2.2" fill="#1C140D"/>
+      <circle cx="45" cy="63" r="2.2" fill="#1C140D"/>
+    </g>
+  </g>
+
+  <!-- Kiwi Drops -->
+  <circle cx="150" cy="370" r="3.5" fill="#7CBD1F"/>
+  <circle cx="345" cy="375" r="3" fill="#7CBD1F"/>
+
+  <!-- Luxury Badge Top Left -->
+  <g transform="translate(35, 40)">
+    <rect width="145" height="34" rx="17" fill="url(#goldRibbon)"/>
+    <text x="72" y="22" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="12" font-weight="700" fill="#241408">SIGNATURE FRUIT</text>
+  </g>
+
+  <!-- Flavour Badge Bottom Right -->
+  <g transform="translate(285, 425)">
+    <rect width="180" height="38" rx="19" fill="#2E4A10"/>
+    <text x="90" y="24" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="13" font-weight="700" fill="#FAF6F0">🥝 Kiwi Almond</text>
+  </g>
+</svg>

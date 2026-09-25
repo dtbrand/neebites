@@ -1,0 +1,5 @@
+<?php get_header(); $title = ''; $subtitle = ''; if (is_category()) { $title = single_cat_title('', false); $subtitle = category_description(); } elseif (is_tag()) { $title = single_tag_title('', false); $subtitle = tag_description(); } elseif (is_author()) { $title = 'Author: ' . get_the_author(); $subtitle = get_the_author_meta('description'); } elseif (is_date()) { $title = is_day() ? get_the_date() : (is_month() ? get_the_date('F Y') : get_the_date('Y')); } elseif (is_search()) { $title = 'Search: ' . get_search_query(); } elseif (is_post_type_archive()) { $title = post_type_archive_title('', false); } else { $title = get_the_archive_title(); $subtitle = get_the_archive_description(); } neebites_page_header($title, $subtitle); ?>
+<div class="archive-wrapper"><div class="container"><div class="archive-content">
+    <?php if (have_posts()) : ?><div class="posts-grid"><?php while (have_posts()) : the_post(); get_template_part('templates/parts/content', get_post_type()); endwhile; ?></div><?php neebites_pagination(); else: get_template_part('templates/parts/content', 'none'); endif; ?>
+</div><?php get_sidebar(); ?></div></div>
+<?php get_footer(); ?>

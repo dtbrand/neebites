@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="auto">
+  <defs>
+    <radialGradient id="matBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FAFBF6"/>
+      <stop offset="70%" stop-color="#F0F4E8"/>
+      <stop offset="100%" stop-color="#DCE6CC"/>
+    </radialGradient>
+    <linearGradient id="chocMatchaShell" x1="20%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#8DB654"/>
+      <stop offset="45%" stop-color="#658F30"/>
+      <stop offset="85%" stop-color="#4B6E1F"/>
+      <stop offset="100%" stop-color="#345012"/>
+    </linearGradient>
+    <linearGradient id="almondNut" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EED6B3"/>
+      <stop offset="50%" stop-color="#D9A86C"/>
+      <stop offset="100%" stop-color="#A0632D"/>
+    </linearGradient>
+    <linearGradient id="goldRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D77F"/>
+      <stop offset="50%" stop-color="#C59B27"/>
+      <stop offset="100%" stop-color="#936D10"/>
+    </linearGradient>
+    <filter id="matShadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#2D4012" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="500" height="500" rx="24" fill="url(#matBg)"/>
+
+  <!-- Pedestal shadow -->
+  <ellipse cx="250" cy="395" rx="145" ry="24" fill="#2D1609" opacity="0.16"/>
+  <ellipse cx="250" cy="392" rx="110" ry="16" fill="#2D1609" opacity="0.22"/>
+
+  <!-- Main Enrobed Chocolate Coated Almond -->
+  <g filter="url(#matShadow)">
+    <path d="M250,110 C320,135 365,220 345,310 C330,370 275,385 240,385 C195,385 145,360 140,290 C135,210 190,120 250,110 Z" fill="url(#chocMatchaShell)"/>
+
+    <!-- Specular Highlight -->
+    <ellipse cx="220" cy="180" rx="35" ry="18" fill="#FFFFFF" opacity="0.25" transform="rotate(-35 220 180)"/>
+
+    <!-- Matcha Tea Powder Drizzle -->
+    <path d="M165,245 Q240,210 325,250" stroke="#A9D36B" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.9"/>
+    <path d="M150,285 Q245,245 335,288" stroke="#A9D36B" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.85"/>
+    <path d="M170,325 Q240,295 315,325" stroke="#A9D36B" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.75"/>
+
+    <!-- Nut Reveal Cross Section Inlay -->
+    <g transform="translate(195, 235)">
+      <ellipse cx="40" cy="40" rx="28" ry="36" fill="url(#almondNut)" transform="rotate(-15 40 40)"/>
+      <ellipse cx="40" cy="40" rx="23" ry="30" fill="#FDF3E3" opacity="0.9" transform="rotate(-15 40 40)"/>
+      <path d="M35,16 Q40,40 37,64" stroke="#D9A86C" stroke-width="2" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Luxury Badge Top Left -->
+  <g transform="translate(35, 40)">
+    <rect width="145" height="34" rx="17" fill="url(#goldRibbon)"/>
+    <text x="72" y="22" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="12" font-weight="700" fill="#241408">UJI MATCHA</text>
+  </g>
+
+  <!-- Flavour Badge Bottom Right -->
+  <g transform="translate(280, 425)">
+    <rect width="185" height="38" rx="19" fill="#4B6E1F"/>
+    <text x="92" y="24" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="13" font-weight="700" fill="#FAF6F0">🍵 Matcha Almond</text>
+  </g>
+</svg>

@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" width="100%" height="auto">
+  <defs>
+    <linearGradient id="heroChocBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3D2314"/>
+      <stop offset="60%" stop-color="#28150B"/>
+      <stop offset="100%" stop-color="#190B05"/>
+    </linearGradient>
+    <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C59B27" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#3D2314" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D77F"/>
+      <stop offset="50%" stop-color="#C59B27"/>
+      <stop offset="100%" stop-color="#936D10"/>
+    </linearGradient>
+    <linearGradient id="chocDark1" x1="20%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#4A2612"/>
+      <stop offset="50%" stop-color="#2D1508"/>
+      <stop offset="100%" stop-color="#140802"/>
+    </linearGradient>
+    <linearGradient id="chocMilk1" x1="20%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#7B4928"/>
+      <stop offset="50%" stop-color="#5E3319"/>
+      <stop offset="100%" stop-color="#381D0B"/>
+    </linearGradient>
+    <linearGradient id="chocWhite1" x1="20%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#FFFDF9"/>
+      <stop offset="50%" stop-color="#F0E3D1"/>
+      <stop offset="100%" stop-color="#C7B297"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect fill="url(#heroChocBg)" width="600" height="500" rx="28"/>
+  <circle cx="300" cy="240" r="190" fill="url(#goldGlow)"/>
+  <circle cx="430" cy="150" r="90" fill="#C59B27" opacity="0.1"/>
+
+  <!-- Artisan Marble & Gold Footed Serving Dish -->
+  <ellipse cx="300" cy="380" rx="190" ry="45" fill="#140802" opacity="0.45"/>
+  <path d="M150,330 C150,400 450,400 450,330 C450,320 150,320 150,330 Z" fill="#241408" stroke="url(#goldGrad)" stroke-width="2.5"/>
+  <ellipse cx="300" cy="330" rx="150" ry="28" fill="#3D2314"/>
+
+  <!-- Piled Artisan Chocolate Coated Almonds in Dish -->
+  <!-- Back Row Almonds -->
+  <g transform="translate(190, 240) rotate(-25)">
+    <ellipse cx="50" cy="30" rx="42" ry="24" fill="url(#chocDark1)"/>
+    <ellipse cx="42" cy="22" rx="16" ry="6" fill="#FFFFFF" opacity="0.25"/>
+  </g>
+  <g transform="translate(310, 240) rotate(20)">
+    <ellipse cx="50" cy="30" rx="44" ry="25" fill="url(#chocMilk1)"/>
+    <ellipse cx="44" cy="22" rx="16" ry="6" fill="#FFFFFF" opacity="0.25"/>
+  </g>
+  <g transform="translate(250, 220) rotate(-5)">
+    <ellipse cx="50" cy="30" rx="40" ry="23" fill="url(#chocWhite1)"/>
+    <ellipse cx="45" cy="24" rx="15" ry="6" fill="#FFFFFF" opacity="0.4"/>
+  </g>
+
+  <!-- Front Centerpiece Dark Chocolate Almond -->
+  <g transform="translate(240, 260) rotate(10)" filter="url(#softGlow)">
+    <ellipse cx="60" cy="40" rx="55" ry="32" fill="url(#chocDark1)"/>
+    <ellipse cx="50" cy="28" rx="26" ry="10" fill="#FFFFFF" opacity="0.28" transform="rotate(-10 50 28)"/>
+    <!-- Gold Foil Dust Swirl -->
+    <path d="M30,35 Q60,20 90,38" stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Side Accent Almonds -->
+  <g transform="translate(160, 285) rotate(-35)">
+    <ellipse cx="45" cy="28" rx="46" ry="26" fill="url(#chocMilk1)"/>
+    <ellipse cx="38" cy="20" rx="16" ry="6" fill="#FFFFFF" opacity="0.2"/>
+  </g>
+  <g transform="translate(340, 285) rotate(30)">
+    <ellipse cx="45" cy="28" rx="45" ry="25" fill="url(#chocDark1)"/>
+    <ellipse cx="40" cy="22" rx="16" ry="6" fill="#FFFFFF" opacity="0.25"/>
+  </g>
+
+  <!-- Cocoa Pod Accent on Side -->
+  <g transform="translate(90, 310) rotate(-20)">
+    <path d="M0,40 C10,10 60,0 80,30 C90,55 50,80 10,70 C-5,65 -5,50 0,40 Z" fill="#5A2E17" stroke="#3D1D0D" stroke-width="2"/>
+    <path d="M5,40 Q40,32 75,32" stroke="#8A4A25" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- Floating Luxury Badges -->
+  <g transform="translate(390, 80)">
+    <rect width="175" height="42" rx="21" fill="#FAF6F0" filter="url(#softGlow)"/>
+    <text x="87" y="26" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="13" font-weight="700" fill="#3D2314">🍫 70% Single-Origin</text>
+  </g>
+  <g transform="translate(35, 170)">
+    <rect width="195" height="42" rx="21" fill="#FAF6F0" filter="url(#softGlow)"/>
+    <text x="97" y="26" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="13" font-weight="700" fill="#3D2314">✨ 100% Pure Cocoa</text>
+  </g>
+  <g transform="translate(45, 420)">
+    <rect width="210" height="40" rx="20" fill="url(#goldGrad)" filter="url(#softGlow)"/>
+    <text x="105" y="25" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="12" font-weight="800" fill="#241408">🌰 CALIFORNIA ROASTED</text>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <rect width="300" height="300" fill="#f4f1ea" rx="12"/>
+  <rect x="25" y="210" width="250" height="12" fill="#c4b5a5" rx="3"/>
+  <!-- 3 small pots on shelf -->
+  <path d="M50 210 L55 175 L85 175 L90 210 Z" fill="#e07a5f"/>
+  <circle cx="70" cy="155" r="22" fill="#52b788"/>
+  <path d="M130 210 L135 165 L170 165 L175 210 Z" fill="#2a9d8f"/>
+  <path d="M152 165 C140 130 165 110 152 90 C160 110 180 130 152 165" fill="#C59B27"/>
+  <path d="M215 210 L220 180 L245 180 L250 210 Z" fill="#e07a5f"/>
+  <circle cx="232" cy="165" r="18" fill="#74c69d"/>
+  <text x="150" y="270" font-family="'Plus Jakarta Sans',sans-serif" font-size="12" font-weight="700" fill="#3D2314" text-anchor="middle">@gourmet_confections</text>
+</svg>

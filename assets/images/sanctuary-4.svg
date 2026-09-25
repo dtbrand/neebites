@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <rect width="300" height="300" fill="#e9f3eb" rx="12"/>
+  <!-- Minimalist stool & fiddle leaf fig -->
+  <line x1="120" y1="260" x2="135" y2="190" stroke="#78716c" stroke-width="4" stroke-linecap="round"/>
+  <line x1="180" y1="260" x2="165" y2="190" stroke="#78716c" stroke-width="4" stroke-linecap="round"/>
+  <rect x="110" y="185" width="80" height="8" rx="4" fill="#57534e"/>
+  <!-- Terracotta planter -->
+  <path d="M125 185 L130 140 L170 140 L175 185 Z" fill="#e07a5f"/>
+  <path d="M150 140 L150 70" stroke="#335c67" stroke-width="3"/>
+  <!-- Violon leaves -->
+  <ellipse cx="140" cy="115" rx="20" ry="14" fill="#6B4226"/>
+  <ellipse cx="160" cy="95" rx="22" ry="15" fill="#C59B27"/>
+  <ellipse cx="150" cy="70" rx="24" ry="16" fill="#231205"/>
+  <text x="150" y="282" font-family="'Plus Jakarta Sans',sans-serif" font-size="12" font-weight="700" fill="#3D2314" text-anchor="middle">@luxury_chocolate_box</text>
+</svg>

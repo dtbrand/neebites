@@ -1,0 +1,25 @@
+/**
+ * Neebites Gutenberg Editor Styles
+ *
+ * @package Neebites
+ * @version 1.1.0
+ */
+
+body {
+    font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+    color: #231205;
+    background-color: #FAF6F0;
+    line-height: 1.6;
+}
+
+.editor-styles-wrapper h1,
+.editor-styles-wrapper h2,
+.editor-styles-wrapper h3,
+.editor-styles-wrapper h4 {
+    font-family: "Newsreader", "Victor Serif", Georgia, serif;
+    color: #3D2314;
+}
+
+.editor-styles-wrapper .wp-block-button__link {
+    border-radius: 9999px;
+}
