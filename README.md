@@ -73,6 +73,7 @@ neebites/
 ## Automated In-Agent Testing
 
 Every component is continuously validated via the inside-agent headless test suite (`105/105` automated checks passing):
+
 - Zero live browser window popups.
 - HTTP status 200 OK, full DOM parsing, and CSS/JS asset integrity verification.
 - Mobile and desktop responsive layout parity checks.
