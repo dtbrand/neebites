@@ -137,7 +137,8 @@ function neebites_template_loop_product_card() {
     // Check wishlist state
     $is_wishlisted = false;
     if (isset($_COOKIE['neebites_wishlist'])) {
-        $wishlist = json_decode(stripslashes($_COOKIE['neebites_wishlist']), true);
+        $wishlist = json_decode(wp_unslash($_COOKIE['neebites_wishlist']), true);
+        $wishlist = is_array($wishlist) ? array_values(array_unique(array_filter(array_map('absint', $wishlist)))) : [];
         if (is_array($wishlist) && in_array($id, $wishlist)) {
             $is_wishlisted = true;
         }
