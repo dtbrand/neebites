@@ -9,13 +9,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
 
-    const ajaxConfig = window.neebitesAjax || {
-        ajaxurl: '/wp-admin/admin-ajax.php',
+    const ajaxConfig = Object.assign({
+        ajaxurl: '',
         nonce: '',
-        freeShippingThreshold: 50,
-        currencySymbol: '$',
+        freeShippingThreshold: 500,
+        shopUrl: '/',
+        cartUrl: '/',
+        checkoutUrl: '',
+        currencySymbol: '₹',
         strings: {}
-    };
+    }, window.neebitesAjax || {});
 
     // Unescape any pre-encoded HTML entities (prevents double-encoding like &amp;amp;)
     const unesc = (val) => {
@@ -34,6 +37,42 @@ document.addEventListener('DOMContentLoaded', () => {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+
+    const formatMoney = (value) => {
+        const amount = Number(value);
+        const symbol = ajaxConfig.currencySymbol || '₹';
+        return `${symbol}${Number.isFinite(amount) ? amount.toFixed(2) : '0.00'}`;
+    };
+
+    const postAjax = async (action, data = {}) => {
+        if (!ajaxConfig.ajaxurl) {
+            throw new Error('AJAX endpoint unavailable');
+        }
+
+        const body = new URLSearchParams({ action, ...data });
+        if (ajaxConfig.nonce) body.set('nonce', ajaxConfig.nonce);
+
+        const response = await fetch(ajaxConfig.ajaxurl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: body.toString()
+        });
+
+        if (!response.ok) {
+            throw new Error(`AJAX request failed (${response.status})`);
+        }
+
+        const payload = await response.json();
+        if (!payload.success) {
+            throw new Error(payload.data?.message || 'Request failed');
+        }
+        return payload;
+    };
+
+    // Keep the no-WooCommerce/demo storefront basket available to every drawer
+    // handler, including handlers registered before the cart section below.
+    const demoCart = [];
 
     // =========================================================================
     // 1. Mobile Menu Drawer
@@ -156,11 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(async () => {
             try {
-                const conf = window.neebitesAjax || (typeof ajaxConfig !== 'undefined' ? ajaxConfig : null) || {};
-                const ajaxUrl = conf.ajaxurl || '/wp-admin/admin-ajax.php';
-                const nonceParam = conf.nonce ? `&nonce=${encodeURIComponent(conf.nonce)}` : '';
-                const url = `${ajaxUrl}?action=neebites_search_products&term=${encodeURIComponent(trimmed)}${nonceParam}`;
-                const res = await fetch(url);
+                if (!ajaxConfig.ajaxurl) throw new Error('AJAX endpoint unavailable');
+                const url = new URL(ajaxConfig.ajaxurl, window.location.href);
+                url.searchParams.set('action', 'neebites_search_products');
+                url.searchParams.set('term', trimmed);
+                if (ajaxConfig.nonce) url.searchParams.set('nonce', ajaxConfig.nonce);
+                const res = await fetch(url.toString(), { credentials: 'same-origin' });
+                if (!res.ok) throw new Error(`Search failed (${res.status})`);
                 const data = await res.json();
 
                 if (data.success && data.data.results && data.data.results.length > 0) {
@@ -241,18 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Asynchronously refresh cart drawer content to guarantee latest items
         try {
-            if (typeof ajaxConfig !== 'undefined' && ajaxConfig.ajaxurl) {
-                const body = new URLSearchParams({
-                    action: 'neebites_get_mini_cart',
-                    nonce: ajaxConfig.nonce
-                });
-                const res = await fetch(ajaxConfig.ajaxurl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: body.toString()
-                });
-                const data = await res.json();
-                if (data.success && data.data && data.data.html) {
+            if (ajaxConfig.ajaxurl && typeof demoCart !== 'undefined' && demoCart.length === 0) {
+                const data = await postAjax('neebites_get_mini_cart');
+                if (data.data && data.data.html) {
                     const bodyContainer = cartDrawer.querySelector('.cart-drawer-body');
                     if (bodyContainer) {
                         bodyContainer.innerHTML = data.data.html;
@@ -298,18 +330,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Asynchronously refresh drawer content to ensure up-to-date wishlist items
         try {
-            if (typeof ajaxConfig !== 'undefined' && ajaxConfig.ajaxurl) {
-                const body = new URLSearchParams({
-                    action: 'neebites_get_wishlist_drawer',
-                    nonce: ajaxConfig.nonce
-                });
-                const res = await fetch(ajaxConfig.ajaxurl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: body.toString()
-                });
-                const data = await res.json();
-                if (data.success && data.data && data.data.html) {
+            if (ajaxConfig.ajaxurl) {
+                const data = await postAjax('neebites_get_wishlist_drawer');
+                if (data.data && data.data.html) {
                     const bodyEl = wishlistDrawer.querySelector('.cart-drawer-body');
                     if (bodyEl) {
                         bodyEl.innerHTML = data.data.html;
@@ -389,31 +412,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updateCartQuantity(cartItemKey, quantity) {
         try {
-            const body = new URLSearchParams({
-                action: 'neebites_update_cart_quantity',
-                nonce: ajaxConfig.nonce,
+            const data = await postAjax('neebites_update_cart_quantity', {
                 cart_item_key: cartItemKey,
                 quantity: quantity
             });
-
-            const res = await fetch(ajaxConfig.ajaxurl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: body.toString()
-            });
-
-            const data = await res.json();
-            if (data.success) {
-                // Update Mini Cart Body
-                const bodyContainer = cartDrawer.querySelector('.cart-drawer-body');
-                if (bodyContainer) {
-                    bodyContainer.innerHTML = data.data.html;
-                }
-                // Update Header Badges
-                document.querySelectorAll('.cart-count').forEach(el => {
-                    el.textContent = data.data.cart_count;
-                });
+            // Update Mini Cart Body
+            const bodyContainer = cartDrawer.querySelector('.cart-drawer-body');
+            if (bodyContainer) {
+                bodyContainer.innerHTML = data.data.html;
             }
+            // Update Header Badges
+            document.querySelectorAll('.cart-count').forEach(el => {
+                el.textContent = data.data.cart_count;
+            });
         } catch (err) {
             console.error('Cart update failed:', err);
         }
@@ -461,20 +472,10 @@ document.addEventListener('DOMContentLoaded', () => {
         openQuickView();
 
         try {
-            const body = new URLSearchParams({
-                action: 'neebites_quick_view',
-                nonce: ajaxConfig.nonce,
+            const data = await postAjax('neebites_quick_view', {
                 product_id: productId || ''
             });
-
-            const res = await fetch(ajaxConfig.ajaxurl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: body.toString()
-            });
-
-            const data = await res.json();
-            if (data.success && qvContent) {
+            if (data.data?.html && qvContent) {
                 qvContent.innerHTML = data.data.html;
                 initQuickViewEvents();
                 return;
@@ -497,13 +498,13 @@ document.addEventListener('DOMContentLoaded', () => {
             qvContent.innerHTML = `
                 <div class="quickview-wrapper" style="display:grid;grid-template-columns:1fr 1.2fr;gap:28px;align-items:center;">
                     <div class="quickview-gallery" style="background:#FAF6F0;border:1px solid #EAE0D5;border-radius:12px;padding:24px;text-align:center;">
-                        <img src="${image}" alt="${name}" style="max-height:280px;width:auto;margin:0 auto;display:block;" />
+                        <img src="${esc(image)}" alt="${esc(name)}" style="max-height:280px;width:auto;margin:0 auto;display:block;" />
                     </div>
                     <div class="quickview-details">
-                        <span style="color:#6B4226;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;">${category}</span>
-                        <h2 style="margin:6px 0 10px;font-size:1.75rem;color:#3D2314;">${name}</h2>
+                        <span style="color:#6B4226;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;">${esc(category)}</span>
+                        <h2 style="margin:6px 0 10px;font-size:1.75rem;color:#3D2314;">${esc(name)}</h2>
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-                            <span style="font-size:22px;font-weight:700;color:#3D2314;">${price}</span>
+                            <span style="font-size:22px;font-weight:700;color:#3D2314;">${esc(price)}</span>
                             <span style="color:#C59B27;font-size:14px;">★★★★★ (48 reviews)</span>
                         </div>
                         <p style="color:#5C3D2E;font-size:14px;line-height:1.6;margin-bottom:16px;">
@@ -517,15 +518,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div style="display:flex;gap:12px;align-items:center;">
                             <button type="button" class="btn-quick-add demo-add-to-basket" 
-                                data-product-id="${productId || '101'}"
-                                data-name="${name}" 
-                                data-price="${price}"
+                                data-product-id="${esc(productId)}"
+                                data-name="${esc(name)}" 
+                                data-price="${esc(price)}"
                                 data-raw-price="${rawPrice}"
-                                data-image="${image}"
+                                data-image="${esc(image)}"
                                 style="flex:1;padding:12px 24px;border-radius:30px;background:#3D2314;color:#ffffff;font-weight:700;border:none;cursor:pointer;">
                                 🍫 Add to Basket
                             </button>
-                            <button type="button" class="btn-card-action btn-wishlist" data-product-id="${productId || '101'}" style="width:46px;height:46px;border-radius:50%;border:1px solid #EAE0D5;background:#FAF6F0;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                            <button type="button" class="btn-card-action btn-wishlist" data-product-id="${esc(productId)}" style="width:46px;height:46px;border-radius:50%;border:1px solid #EAE0D5;background:#FAF6F0;display:flex;align-items:center;justify-content:center;cursor:pointer;">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                             </button>
                         </div>
@@ -577,19 +578,24 @@ document.addEventListener('DOMContentLoaded', () => {
         showBotanicalToast(isActive ? '❤️ Added to your confectionery wishlist! 🍫' : 'Removed from wishlist');
 
         try {
-            const body = new URLSearchParams({
-                action: 'neebites_toggle_wishlist',
-                nonce: ajaxConfig.nonce,
-                product_id: productId
-            });
-
-            await fetch(ajaxConfig.ajaxurl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: body.toString()
-            });
+            const data = await postAjax('neebites_toggle_wishlist', { product_id: productId });
+            if (typeof data.data?.count !== 'undefined') {
+                document.querySelectorAll('.wishlist-count').forEach(el => {
+                    el.textContent = data.data.count;
+                });
+            }
         } catch (err) {
-            // Silently maintain local state
+            // Restore the previous state when the server rejects the toggle.
+            wishBtn.classList.toggle('active', !isActive);
+            if (svg) {
+                svg.setAttribute('fill', isActive ? 'none' : 'currentColor');
+                svg.style.color = isActive ? '' : '#e53935';
+            }
+            document.querySelectorAll('.wishlist-count').forEach(el => {
+                let count = parseInt(el.textContent, 10) || 0;
+                el.textContent = isActive ? Math.max(0, count - 1) : count + 1;
+            });
+            showBotanicalToast('Wishlist could not be updated. Please try again.');
         }
     });
 
@@ -604,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#3D2314;color:#FAF6F0;padding:14px 24px;border-radius:30px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(61,35,20,0.3);z-index:99999;display:flex;align-items:center;gap:10px;transform:translateY(80px);opacity:0;transition:all 0.3s cubic-bezier(0.16,1,0.3,1);';
             document.body.appendChild(toast);
         }
-        toast.innerHTML = message;
+        toast.textContent = String(message).replace(/<[^>]*>/g, '');
         requestAnimationFrame(() => {
             toast.style.transform = 'translateY(0)';
             toast.style.opacity = '1';
@@ -615,9 +621,6 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.style.opacity = '0';
         }, 3200);
     }
-
-    // In-memory demo cart storage
-    const demoCart = [];
 
     function renderDemoCart() {
         const container = document.getElementById('demo-cart-items');
@@ -634,12 +637,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span style="font-size:48px;display:block;margin-bottom:12px;">🍫</span>
                     <h4 style="margin:0 0 8px;color:#3D2314;font-size:18px">Your chocolate basket is empty</h4>
                     <p style="color:#6B4226;font-size:14px;margin:0 0 20px">Explore our artisan confectionery collection and treat yourself to gourmet chocolate coated almonds.</p>
-                    <a href="/shop" class="btn btn-primary" style="display:inline-block;padding:10px 24px;border-radius:30px;background:#3D2314;color:#FAF6F0;text-decoration:none;font-size:14px;font-weight:600">Shop All Confections &rarr;</a>
+                    <a href="${esc(ajaxConfig.shopUrl || '/')}" class="btn btn-primary" style="display:inline-block;padding:10px 24px;border-radius:30px;background:#3D2314;color:#FAF6F0;text-decoration:none;font-size:14px;font-weight:600">Shop All Confections &rarr;</a>
                 </div>
             `;
             if (footer) footer.style.display = 'none';
             if (shippingFill) shippingFill.style.width = '0%';
-            if (shippingMsg) shippingMsg.innerHTML = 'Add <strong>₹500.00</strong> more to unlock FREE cold-pack delivery!';
+            if (shippingMsg) shippingMsg.innerHTML = `Add <strong>${formatMoney(ajaxConfig.freeShippingThreshold)}</strong> more to unlock FREE cold-pack delivery!`;
             return;
         }
 
@@ -652,11 +655,11 @@ document.addEventListener('DOMContentLoaded', () => {
             html += `
                 <div class="mini-cart-item" style="display:flex;gap:14px;align-items:center;padding-bottom:14px;border-bottom:1px solid #EAE0D5;">
                     <div style="width:64px;height:64px;border-radius:8px;background:#FAF6F0;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
-                        <img src="${item.image}" alt="${item.name}" style="max-height:56px;width:auto;" />
+                        <img src="${esc(item.image)}" alt="${esc(item.name)}" style="max-height:56px;width:auto;" />
                     </div>
                     <div style="flex:1;min-width:0;">
-                        <h4 style="margin:0 0 4px;font-size:14px;color:#3D2314;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</h4>
-                        <div style="font-size:13px;color:#6B4226;font-weight:700;">$${itemTotal.toFixed(2)}</div>
+                        <h4 style="margin:0 0 4px;font-size:14px;color:#3D2314;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(item.name)}</h4>
+                        <div style="font-size:13px;color:#6B4226;font-weight:700;">${formatMoney(itemTotal)}</div>
                         <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
                             <button type="button" class="btn-demo-qty" data-action="minus" data-index="${index}" style="width:24px;height:24px;border-radius:50%;border:1px solid #ccc;background:#fff;cursor:pointer;font-weight:bold;line-height:1;">-</button>
                             <span style="font-size:13px;font-weight:600;min-width:18px;text-align:center;">${item.qty}</span>
@@ -671,10 +674,10 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
 
         if (footer) footer.style.display = 'block';
-        if (subtotalEl) subtotalEl.textContent = `$${total.toFixed(2)}`;
+        if (subtotalEl) subtotalEl.textContent = formatMoney(total);
 
         // Free Shipping calculation (threshold $50)
-        const threshold = 50.00;
+        const threshold = Number(ajaxConfig.freeShippingThreshold) || 500;
         const diff = threshold - total;
         const percent = Math.min(100, Math.round((total / threshold) * 100));
 
@@ -683,7 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (diff <= 0) {
                 shippingMsg.innerHTML = '🎉 <strong>Congratulations! You unlocked FREE nursery shipping!</strong>';
             } else {
-                shippingMsg.innerHTML = `Add <strong>$${diff.toFixed(2)}</strong> more to unlock FREE shipping!`;
+                shippingMsg.innerHTML = `Add <strong>${formatMoney(diff)}</strong> more to unlock FREE shipping!`;
             }
         }
     }
@@ -694,9 +697,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!addBtn) return;
         e.preventDefault();
 
-        const id = addBtn.dataset.productId || '101';
+        const id = addBtn.dataset.productId;
+        if (!id) return;
         const name = addBtn.dataset.name || 'Artisan Chocolate';
-        const price = addBtn.dataset.price || '₹349.00';
+        const price = addBtn.dataset.price || `${ajaxConfig.currencySymbol || '₹'}349.00`;
         const rawPrice = parseFloat(addBtn.dataset.rawPrice) || 349.00;
         const image = addBtn.dataset.image || '';
 
@@ -819,11 +823,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         const remaining = wishlistDrawer.querySelectorAll('.wishlist-item');
                         if (remaining.length === 0) {
                             // If empty, fetch empty state markup
-                            if (typeof ajaxConfig !== 'undefined' && ajaxConfig.ajaxurl) {
-                                fetch(ajaxConfig.ajaxurl + '?action=neebites_get_wishlist_drawer')
-                                    .then(r => r.json())
+                            if (ajaxConfig.ajaxurl) {
+                                postAjax('neebites_get_wishlist_drawer')
                                     .then(d => {
-                                        if (d.success && d.data && d.data.html) {
+                                        if (d.data && d.data.html) {
                                             const bodyEl = wishlistDrawer.querySelector('.cart-drawer-body');
                                             if (bodyEl) bodyEl.innerHTML = d.data.html;
                                         }
@@ -843,18 +846,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 showBotanicalToast('Removed from your confectionery wishlist');
 
-                if (pid && typeof ajaxConfig !== 'undefined' && ajaxConfig.ajaxurl) {
+                if (pid && ajaxConfig.ajaxurl) {
                     try {
-                        const body = new URLSearchParams({
-                            action: 'neebites_toggle_wishlist',
-                            nonce: ajaxConfig.nonce,
-                            product_id: pid
-                        });
-                        await fetch(ajaxConfig.ajaxurl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: body.toString()
-                        });
+                        await postAjax('neebites_toggle_wishlist', { product_id: pid });
                     } catch (err) {}
                 }
             }
@@ -1187,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const id = addAccBtn.dataset.id || 'acc-item';
         const name = addAccBtn.dataset.name || 'Care Item';
-        const price = addAccBtn.dataset.price || '$12.00';
+        const price = addAccBtn.dataset.price || `${ajaxConfig.currencySymbol || '₹'}12.00`;
         const rawPrice = parseFloat(addAccBtn.dataset.rawPrice) || 12.00;
 
         addAccBtn.textContent = '✓ Added';
@@ -1326,7 +1320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.style.setProperty('--price-fill', pct + '%');
         };
 
-        const currency = ajaxConfig.currencySymbol || '$';
+        const currency = ajaxConfig.currencySymbol || '₹';
         const resultsCountEl = shopMain.querySelector('.woocommerce-result-count');
         const baseResultsTemplate = resultsCountEl ? resultsCountEl.textContent : '';
         const resultsTemplate = (ajaxConfig.strings || {}).resultsCount || 'Showing %1$s of %2$s confections';
@@ -2245,9 +2239,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Execute selected action
                 if (currentTargetAction === 'buy_now') {
-                    const baseCheckout = (typeof neebitesAjax !== 'undefined' && neebitesAjax.checkoutUrl)
-                        ? neebitesAjax.checkoutUrl
-                        : '/checkout/';
+                    const baseCheckout = ajaxConfig.checkoutUrl || '/';
                     const sep = baseCheckout.includes('?') ? '&' : '?';
 
                     if (typeof showBotanicalToast === 'function') {
@@ -2581,9 +2573,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Determine checkout destination
-        const baseCheckout = (typeof neebitesAjax !== 'undefined' && neebitesAjax.checkoutUrl)
-            ? neebitesAjax.checkoutUrl
-            : (buyNowBtn.dataset.checkoutUrl || '/checkout/');
+        const baseCheckout = ajaxConfig.checkoutUrl || buyNowBtn.dataset.checkoutUrl || '/';
         const sep = baseCheckout.includes('?') ? '&' : '?';
 
         // Redirect directly to checkout with auto-added product
@@ -2609,14 +2599,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         valSpan.textContent = newQty;
 
-        if (typeof jQuery !== 'undefined') {
+        if (typeof jQuery !== 'undefined' && ajaxConfig.ajaxurl) {
             jQuery.ajax({
-                url: (typeof neebitesAjax !== 'undefined') ? neebitesAjax.ajaxurl : '/wp-admin/admin-ajax.php',
+                url: ajaxConfig.ajaxurl,
                 type: 'POST',
                 data: {
                     action: 'neebites_update_checkout_qty',
                     cart_item_key: key,
-                    quantity: newQty
+                    quantity: newQty,
+                    nonce: ajaxConfig.nonce
                 },
                 success: function() {
                     jQuery(document.body).trigger('update_checkout');
