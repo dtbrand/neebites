@@ -262,9 +262,9 @@ function neebites_shipping_bar() {
  */
 function neebites_get_wishlist_count_total() {
     if (isset($_COOKIE['neebites_wishlist'])) {
-        $items = json_decode(stripslashes($_COOKIE['neebites_wishlist']), true);
+        $items = json_decode(wp_unslash($_COOKIE['neebites_wishlist']), true);
         if (is_array($items)) {
-            return count($items);
+            return count(array_values(array_unique(array_filter(array_map('absint', $items)))));
         }
     }
     return 0;
@@ -768,6 +768,30 @@ function neebites_get_demo_products() {
 }
 
 /**
+ * Resolve a bundled demo product to its live WooCommerce product ID.
+ *
+ * Demo cards use stable IDs so the theme still works without WooCommerce.
+ * When WooCommerce is active, the SKU is the source of truth and actions
+ * should target the real product instead of an in-memory demo item.
+ *
+ * @param array $demo_product Demo product data.
+ * @return int Live product ID, or the stable demo ID when no live product exists.
+ */
+function neebites_resolve_demo_product_id($demo_product) {
+    $demo_id = isset($demo_product['id']) ? absint($demo_product['id']) : 0;
+    $sku     = isset($demo_product['sku']) ? sanitize_text_field($demo_product['sku']) : '';
+
+    if ($sku && function_exists('wc_get_product_id_by_sku') && function_exists('wc_get_product')) {
+        $live_id = absint(wc_get_product_id_by_sku($sku));
+        if ($live_id && wc_get_product($live_id)) {
+            return $live_id;
+        }
+    }
+
+    return $demo_id;
+}
+
+/**
  * Derive lowercase filter tokens for product filtering.
  *
  * The single returned string powers the homepage trending tabs,
@@ -960,13 +984,14 @@ function neebites_render_demo_products_grid($atts = []) {
     ?>
     <div class="woocommerce neebites-demo-products-wrapper">
         <ul class="products columns-<?php echo esc_attr($cols); ?> neebites-products-grid">
-            <?php foreach ($products as $p) : 
-                $prod_url = home_url('/shop');
-                if (function_exists('wc_get_product_id_by_sku') && !empty($p['sku'])) {
-                    $real_id = wc_get_product_id_by_sku($p['sku']);
-                    if ($real_id) {
-                        $prod_url = get_permalink($real_id);
-                    }
+            <?php foreach ($products as $p) :
+                $resolved_id = neebites_resolve_demo_product_id($p);
+                $live_product = ($resolved_id && $resolved_id !== absint($p['id']) && function_exists('wc_get_product'))
+                    ? wc_get_product($resolved_id)
+                    : false;
+                $prod_url = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/shop/');
+                if ($live_product) {
+                    $prod_url = get_permalink($resolved_id);
                 }
                 $filter_tags = neebites_derive_filter_tags(
                     isset($p['category']) ? $p['category'] : '',
@@ -987,8 +1012,10 @@ function neebites_render_demo_products_grid($atts = []) {
                     $extra_classes .= ' flavor-gourmet';
                 }
             ?>
-                <li class="product neebites-product-card post-<?php echo esc_attr($p['id']); ?> <?php echo esc_attr($extra_classes); ?>" 
-                    data-product-id="<?php echo esc_attr($p['id']); ?>"
+                <li class="product neebites-product-card post-<?php echo esc_attr($resolved_id); ?> <?php echo esc_attr($extra_classes); ?>"
+                    data-product-id="<?php echo esc_attr($resolved_id); ?>"
+                    data-demo-id="<?php echo esc_attr($p['id']); ?>"
+                    data-product-sku="<?php echo esc_attr($p['sku']); ?>"
                     data-name="<?php echo esc_attr($p['name']); ?>"
                     data-price="<?php echo esc_attr($p['price']); ?>"
                     data-raw-price="<?php echo esc_attr($p['raw_price']); ?>"
@@ -1007,10 +1034,10 @@ function neebites_render_demo_products_grid($atts = []) {
                             <?php endif; ?>
                         </div>
                         <div class="product-card-actions">
-                            <button type="button" class="btn-card-action btn-wishlist" data-product-id="<?php echo esc_attr($p['id']); ?>" aria-label="<?php esc_attr_e('Add to Wishlist', 'neebites'); ?>" title="<?php esc_attr_e('Add to Wishlist', 'neebites'); ?>">
+                            <button type="button" class="btn-card-action btn-wishlist" data-product-id="<?php echo esc_attr($resolved_id); ?>" aria-label="<?php esc_attr_e('Add to Wishlist', 'neebites'); ?>" title="<?php esc_attr_e('Add to Wishlist', 'neebites'); ?>">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                             </button>
-                            <button type="button" class="btn-card-action btn-quickview" data-product-id="<?php echo esc_attr($p['id']); ?>" aria-label="<?php esc_attr_e('Quick View', 'neebites'); ?>" title="<?php esc_attr_e('Quick View', 'neebites'); ?>">
+                            <button type="button" class="btn-card-action btn-quickview" data-product-id="<?php echo esc_attr($resolved_id); ?>" aria-label="<?php esc_attr_e('Quick View', 'neebites'); ?>" title="<?php esc_attr_e('Quick View', 'neebites'); ?>">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
                             </button>
                         </div>
@@ -1021,8 +1048,25 @@ function neebites_render_demo_products_grid($atts = []) {
                             <?php echo neebites_rating_chip_html($p['rating'], $p['reviews']); ?>
                         </div>
                         <div class="product-quick-add">
+                            <?php if ($live_product && $live_product->is_type('simple') && $live_product->is_in_stock()) : ?>
+                                <a href="<?php echo esc_url($live_product->add_to_cart_url()); ?>"
+                                   data-quantity="1"
+                                   class="btn-quick-add btn-card-add-cart add_to_cart_button ajax_add_to_cart"
+                                   data-product_id="<?php echo esc_attr($resolved_id); ?>"
+                                   data-product_sku="<?php echo esc_attr($p['sku']); ?>"
+                                   aria-label="<?php echo esc_attr($live_product->add_to_cart_description()); ?>">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                    <span class="btn-text"><?php esc_html_e('Add to Bag', 'neebites'); ?></span>
+                                </a>
+                            <?php elseif ($live_product) : ?>
+                                <a href="<?php echo esc_url($prod_url); ?>" class="btn-quick-add btn-card-view-item" aria-label="<?php esc_attr_e('View Confection', 'neebites'); ?>">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+                                    <span class="btn-text"><?php esc_html_e('View Confection', 'neebites'); ?></span>
+                                </a>
+                            <?php else : ?>
                             <button type="button" class="btn-quick-add demo-add-to-basket" 
-                                data-product-id="<?php echo esc_attr($p['id']); ?>"
+                                data-product-id="<?php echo esc_attr($resolved_id); ?>"
+                                data-demo-id="<?php echo esc_attr($p['id']); ?>"
                                 data-name="<?php echo esc_attr($p['name']); ?>" 
                                 data-price="<?php echo esc_attr($p['price']); ?>"
                                 data-raw-price="<?php echo esc_attr($p['raw_price']); ?>"
@@ -1031,6 +1075,7 @@ function neebites_render_demo_products_grid($atts = []) {
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
                                 <span class="btn-text"><?php esc_html_e('Add to Bag', 'neebites'); ?></span>
                             </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <div class="product-card-info">
