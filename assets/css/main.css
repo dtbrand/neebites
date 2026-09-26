@@ -2449,3 +2449,94 @@ input:focus, select:focus, textarea:focus, .search-input-group:focus-within {
     }
 }
 
+/* Final mobile guardrails: keep dynamic WooCommerce markup inside the viewport. */
+@media (max-width: 768px) {
+    html,
+    body {
+        max-width: 100%;
+        overflow-x: clip;
+    }
+
+    .container,
+    .site-main,
+    .content-area {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .neebites-products-grid,
+    ul.products.neebites-products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+    }
+
+    .neebites-product-card,
+    .neebites-product-card .product-card-info,
+    .neebites-product-card .product-card-title {
+        min-width: 0;
+    }
+
+    .neebites-product-card .product-card-title a,
+    .neebites-product-card .product-title-sub {
+        overflow-wrap: anywhere;
+    }
+
+    .neebites-product-card .btn-card-add-cart,
+    .neebites-product-card .btn-quick-add,
+    .neebites-product-card .btn-card-view-item {
+        min-height: 44px;
+        padding-inline: 10px;
+        white-space: normal;
+    }
+
+    .neebites-modal-dialog {
+        width: min(100% - 24px, 680px);
+        max-height: calc(100dvh - 24px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .quickview-container,
+    .quickview-wrapper {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 18px !important;
+    }
+
+    .quickview-main-image img,
+    .quickview-gallery img {
+        max-height: 42dvh !important;
+    }
+
+    .neebites-cart-drawer,
+    .neebites-wishlist-drawer {
+        width: min(100%, 420px) !important;
+    }
+
+    .header-search-inner {
+        width: min(100% - 24px, 680px);
+    }
+
+    .header-search-form input[type="search"],
+    .woocommerce form .input-text,
+    .woocommerce form select,
+    .woocommerce form textarea {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 420px) {
+    .neebites-products-grid,
+    ul.products.neebites-products-grid {
+        gap: 10px !important;
+    }
+
+    .neebites-product-card .product-card-price {
+        flex-wrap: wrap;
+        gap: 2px 6px;
+    }
+
+    .neebites-product-card .product-card-category {
+        white-space: normal;
+    }
+}
+
