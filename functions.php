@@ -8,7 +8,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('NEEBITES_VERSION', '2.7.3');
+define('NEEBITES_VERSION', '2.7.4');
 define('NEEBITES_THEME_DIR', get_template_directory());
 define('NEEBITES_THEME_URI', get_template_directory_uri());
 define('NEEBITES_ASSETS_URI', NEEBITES_THEME_URI . '/assets');
@@ -3917,7 +3917,10 @@ function neebites_enqueue_assets() {
         'ajaxurl'               => admin_url('admin-ajax.php'),
         'nonce'                 => wp_create_nonce('neebites_nonce'),
         'freeShippingThreshold' => $free_threshold,
+        'shopUrl'               => function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/shop/'),
+        'cartUrl'               => function_exists('wc_get_cart_url') ? wc_get_cart_url() : home_url('/'),
         'checkoutUrl'           => function_exists('wc_get_checkout_url') ? wc_get_checkout_url() : home_url('/checkout/'),
+        'accountUrl'            => function_exists('wc_get_page_permalink') ? wc_get_page_permalink('myaccount') : wp_login_url(),
         'currencySymbol'        => function_exists('get_woocommerce_currency_symbol') ? get_woocommerce_currency_symbol() : '$',
         'strings'               => [
             'loading'        => esc_html__('Loading...', 'neebites'),
