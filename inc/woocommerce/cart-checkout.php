@@ -277,7 +277,8 @@ function neebites_render_mini_cart_content() {
 function neebites_render_wishlist_drawer_content() {
     $wishlist = [];
     if (isset($_COOKIE['neebites_wishlist'])) {
-        $decoded = json_decode(stripslashes($_COOKIE['neebites_wishlist']), true);
+        $decoded = json_decode(wp_unslash($_COOKIE['neebites_wishlist']), true);
+        $decoded = is_array($decoded) ? array_values(array_unique(array_filter(array_map('absint', $decoded)))) : [];
         if (is_array($decoded)) {
             $wishlist = array_values(array_filter($decoded));
         }
