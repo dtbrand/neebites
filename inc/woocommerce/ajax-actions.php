@@ -87,10 +87,18 @@ function neebites_ajax_search_products() {
                 if (!empty($seen_titles[$name_lower])) continue;
                 $seen_titles[$name_lower] = true;
 
-                $product_url = home_url('/shop');
+                $resolved_id = function_exists('neebites_resolve_demo_product_id')
+                    ? neebites_resolve_demo_product_id($dp)
+                    : absint($dp['id']);
+                $live_product = ($resolved_id && $resolved_id !== absint($dp['id']) && function_exists('wc_get_product'))
+                    ? wc_get_product($resolved_id)
+                    : false;
+                $product_url = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/shop/');
                 $slug = sanitize_title($dp['name']);
                 $existing_post = get_page_by_path($slug, OBJECT, 'product');
-                if ($existing_post) {
+                if ($live_product) {
+                    $product_url = get_permalink($resolved_id);
+                } elseif ($existing_post) {
                     $product_url = get_permalink($existing_post->ID);
                 } else {
                     $product_url = add_query_arg(['s' => $dp['name'], 'post_type' => 'product'], home_url('/'));
@@ -99,7 +107,9 @@ function neebites_ajax_search_products() {
                 $thumb_html = '<img src="' . esc_url($dp['image']) . '" width="54" height="54" style="object-fit:cover;border-radius:10px" alt="' . esc_attr($dp['name']) . '" />';
 
                 $results[] = [
-                    'id'        => $dp['id'],
+                    'id'        => $resolved_id,
+                    'demo_id'   => absint($dp['id']),
+                    'sku'       => sanitize_text_field($dp['sku']),
                     'title'     => html_entity_decode($dp['name'], ENT_QUOTES, 'UTF-8'),
                     'url'       => $product_url,
                     'thumb'     => $thumb_html,
@@ -149,17 +159,7 @@ function neebites_ajax_quick_view() {
                 'badge'    => $p['badge'],
             ];
         } else {
-            $demo = [
-                'name'     => 'Dark Chocolate Almond (70% Single-Origin Belgian)',
-                'price'    => '₹349.00',
-                'raw_price'=> 349.00,
-                'desc'     => 'Whole slow-roasted California almonds drenched in silky 70% dark Belgian chocolate with deep cocoa intensity and balanced bittersweet finish.',
-                'image'    => get_template_directory_uri() . '/assets/images/choc-dark-almond.svg',
-                'light'    => '70% Belgian Single-Origin Dark',
-                'water'    => 'California Nonpareil Roasted',
-                'humidity' => '100% Vegetarian & Pure Cocoa Butter',
-                'badge'    => 'Best Seller',
-            ];
+            wp_send_json_error(['message' => 'Product not found']);
         }
 
         ob_start();
@@ -276,8 +276,8 @@ add_action('wp_ajax_nopriv_neebites_quick_view', 'neebites_ajax_quick_view');
 function neebites_ajax_update_cart_quantity() {
     check_ajax_referer('neebites_nonce', 'nonce');
 
-    $cart_item_key = isset($_POST['cart_item_key']) ? sanitize_text_field($_POST['cart_item_key']) : '';
-    $quantity      = isset($_POST['quantity']) ? (int) $_POST['quantity'] : 0;
+    $cart_item_key = isset($_POST['cart_item_key']) ? sanitize_text_field(wp_unslash($_POST['cart_item_key'])) : '';
+    $quantity      = isset($_POST['quantity']) ? max(0, min(99, absint($_POST['quantity']))) : 0;
 
     if (!$cart_item_key || !function_exists('WC') || !WC()->cart) {
         wp_send_json_error(['message' => 'Invalid request']);
@@ -309,7 +309,7 @@ function neebites_ajax_update_cart_quantity() {
             'subtotal'   => WC()->cart->get_cart_subtotal(),
             'html'       => $mini_cart_html,
         ]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         wp_send_json_error(['message' => $e->getMessage()]);
     }
 }
@@ -329,9 +329,9 @@ function neebites_ajax_toggle_wishlist() {
 
     $wishlist = [];
     if (isset($_COOKIE['neebites_wishlist'])) {
-        $decoded = json_decode(stripslashes($_COOKIE['neebites_wishlist']), true);
+        $decoded = json_decode(wp_unslash($_COOKIE['neebites_wishlist']), true);
         if (is_array($decoded)) {
-            $wishlist = $decoded;
+            $wishlist = array_values(array_unique(array_filter(array_map('absint', $decoded))));
         }
     }
 
@@ -347,7 +347,18 @@ function neebites_ajax_toggle_wishlist() {
     }
 
     $wishlist = array_values(array_unique($wishlist));
-    setcookie('neebites_wishlist', json_encode($wishlist), time() + (86400 * 30), '/');
+    $cookie_options = [
+        'expires'  => time() + (86400 * 30),
+        'path'     => defined('COOKIEPATH') && COOKIEPATH ? COOKIEPATH : '/',
+        'secure'   => is_ssl(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ];
+    if (defined('COOKIE_DOMAIN') && COOKIE_DOMAIN) {
+        $cookie_options['domain'] = COOKIE_DOMAIN;
+    }
+    setcookie('neebites_wishlist', wp_json_encode($wishlist), $cookie_options);
+    $_COOKIE['neebites_wishlist'] = wp_json_encode($wishlist);
 
     wp_send_json_success([
         'added' => $added,
